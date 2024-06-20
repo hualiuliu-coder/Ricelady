@@ -1,0 +1,79 @@
+// 全局变量
+let Engine = Matter.Engine,
+    World = Matter.World,
+    Bodies = Matter.Bodies,
+    engine;
+let images = [];
+let imgBodies = [];
+let imgPaths = ['6.png', '6.png', '6.png', '6.png', '6.png', '6.png', '6.png', '6.png', '6.png', '6.png', '6.png', '6.png', '6.png', '6.png', '6.png', '6.png', '6.png', '6.png', '6.png', '6.png', '6.png', '6.png', '5.png', '5.png', '5.png', '5.png', '5.png', '7.png', '7.png', '7.png', '7.png', '7.png', '7.png']; // 替换为你的图片路径
+let loadedImages = [];
+const scaleFactor = 0.1; // 缩小比例
+
+function preload() {
+    // 预加载图片
+    for (let i = 0; i < imgPaths.length; i++) {
+        images[i] = loadImage(imgPaths[i]);
+    }
+}
+
+function setup() {
+    createCanvas(windowWidth, windowHeight);
+
+    // 创建引擎
+    engine = Engine.create();
+    let world = engine.world;
+
+    // 创建地面
+    let ground = Bodies.rectangle(width / 2, height + 10, width, 20, { isStatic: true });
+    World.add(world, ground);
+
+    // 运行引擎
+    Engine.run(engine);
+
+    // 按钮事件监听
+    select('#addImageBtn').mousePressed(addRandomImage);
+    select('#resetBtn').mousePressed(resetWorld);
+}
+
+function draw() {
+    background(253, 239, 239);
+
+    // 绘制图片
+    for (let i = 0; i < imgBodies.length; i++) {
+        let imgBody = imgBodies[i];
+        let img = loadedImages[i];
+        let angle = imgBody.angle;
+        push();
+        translate(imgBody.position.x, imgBody.position.y);
+        rotate(angle);
+        imageMode(CENTER);
+        image(img, 0, 0, img.width * scaleFactor, img.height * scaleFactor);
+        pop();
+    }
+}
+
+// 添加随机图片
+function addRandomImage() {
+    let imgIndex = floor(random(images.length));
+    let imgWidth = images[imgIndex].width * scaleFactor;
+    let imgHeight = images[imgIndex].height * scaleFactor;
+    let imgBody = Bodies.rectangle(random(0, width), -imgHeight, imgWidth, imgHeight, { restitution: 0.8 });
+    World.add(engine.world, imgBody);
+    imgBodies.push(imgBody);
+    loadedImages.push(images[imgIndex]);
+}
+
+// 重置世界
+function resetWorld() {
+    imgBodies.forEach(body => World.remove(engine.world, body));
+    imgBodies = [];
+    loadedImages = [];
+}
+
+function mousePressed() {
+    addRandomImage();
+}
+
+function windowResized() {
+    resizeCanvas(windowWidth, windowHeight);
+}
